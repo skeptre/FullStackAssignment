@@ -3,97 +3,113 @@ const sqlite3 = require('sqlite3').verbose();
 const DBSOURCE = 'db.sqlite';
 
 let db = new sqlite3.Database(DBSOURCE, (err) => {
-    if(err){
-        console.log(err.message);
+    if (err) {
+        console.error('Database connection error:', err.message);
         throw err;
-    }else{
-        console.log('Connected to the SQLite database.')
+    } else {
+        console.log('Connected to the SQLite database.');
 
-        db.run(`CREATE TABLE users (
+        // Enable foreign key constraints
+        db.run('PRAGMA foreign_keys = ON');
+
+        // Create Users Table
+        db.run(
+            `CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                first_name text,
-                last_name text,
-                email text UNIQUE,
-                password text,
-                salt text,
-                session_token text,
+                first_name TEXT NOT NULL,
+                last_name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                salt TEXT,
+                session_token TEXT,
                 CONSTRAINT email_unique UNIQUE (email)
-            )`, (err) => {
-                if(err){
-                    console.log('Users table already created');
-                }else{
+            )`,
+            (err) => {
+                if (err) {
+                    console.error(`Error creating users table: ${err.message}`);
+                } else {
                     console.log('Users table created');
                 }
             }
         );
 
-        
-        db.run(`CREATE TABLE events (
+        // Create Events Table
+        db.run(
+            `CREATE TABLE IF NOT EXISTS events (
                 event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                description TEXT,
-                location TEXT,
-                start_date INTEGER,
-                close_registration INTEGER,
-                max_attendees INTEGER,
-                creator_id INTEGER,
-                FOREIGN KEY(creator_id) REFERENCES users(user_id)
-            )`, (err) => {
-                if(err){
-                    console.log('Events table already created');
-                }else{
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                location TEXT NOT NULL,
+                start_date INTEGER NOT NULL,
+                close_registration INTEGER NOT NULL,
+                max_attendees INTEGER NOT NULL,
+                creator_id INTEGER NOT NULL,
+                FOREIGN KEY (creator_id) REFERENCES users(user_id)
+            )`,
+            (err) => {
+                if (err) {
+                    console.error(`Error creating events table: ${err.message}`);
+                } else {
                     console.log('Events table created');
                 }
             }
         );
 
-        db.run(`CREATE TABLE attendees (
-                event_id INTEGER,
-                user_id INTEGER,
+        // Create Attendees Table
+        db.run(
+            `CREATE TABLE IF NOT EXISTS attendees (
+                event_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
                 PRIMARY KEY (event_id, user_id),
                 FOREIGN KEY (event_id) REFERENCES events(event_id),
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
-            )`, (err) => {
-                if(err){
-                    // console.log(err)
-                    console.log('Attendees table already created');
-                }else{
+            )`,
+            (err) => {
+                if (err) {
+                    console.error(`Error creating attendees table: ${err.message}`);
+                } else {
                     console.log('Attendees table created');
                 }
             }
         );
 
-        db.run(`CREATE TABLE questions (
+        // Create Questions Table
+        db.run(
+            `CREATE TABLE IF NOT EXISTS questions (
                 question_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                question TEXT,
-                asked_by INTEGER,
-                event_id INTEGER,
-                votes INTEGER,
-                FOREIGN KEY (asked_by) REFERENCES users(user_id)
+                question TEXT NOT NULL,
+                asked_by INTEGER NOT NULL,
+                event_id INTEGER NOT NULL,
+                votes INTEGER DEFAULT 0,
+                FOREIGN KEY (asked_by) REFERENCES users(user_id),
                 FOREIGN KEY (event_id) REFERENCES events(event_id)
-            )`, (err) => {
-                if(err){
-                    console.log('Questions table already created');
-                }else{
+            )`,
+            (err) => {
+                if (err) {
+                    console.error(`Error creating questions table: ${err.message}`);
+                } else {
                     console.log('Questions table created');
                 }
             }
         );
 
-        db.run(`CREATE TABLE votes (
-            question_id INTEGER,
-            voter_id INTEGER,
-            PRIMARY KEY (question_id, voter_id),
-            FOREIGN KEY (question_id) REFERENCES questions(question_id),
-            FOREIGN KEY (voter_id) REFERENCES users(user_id)
-        )`, (err) => {
-            if(err){
-                console.log('Votes table already created');
-            }else{
-                console.log('Votes table created');
+        // Create Votes Table
+        db.run(
+            `CREATE TABLE IF NOT EXISTS votes (
+                question_id INTEGER NOT NULL,
+                voter_id INTEGER NOT NULL,
+                PRIMARY KEY (question_id, voter_id),
+                FOREIGN KEY (question_id) REFERENCES questions(question_id),
+                FOREIGN KEY (voter_id) REFERENCES users(user_id)
+            )`,
+            (err) => {
+                if (err) {
+                    console.error(`Error creating votes table: ${err.message}`);
+                } else {
+                    console.log('Votes table created');
+                }
             }
-        }
-    );
+        );
     }
 });
 
