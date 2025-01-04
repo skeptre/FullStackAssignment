@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
-const db = require('../../database');
 const Joi = require('joi');
+const userModel = require('../models/userModel'); // Import the user model
 
 const userSchema = Joi.object({
     first_name: Joi.string().required(),
@@ -17,28 +17,26 @@ exports.createUser = async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        db.run(
-            `INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)`,
-            [first_name, last_name, email, hashedPassword],
-            function (err) {
-                if (err) {
-                    if (err.code === 'SQLITE_CONSTRAINT') {
-                        return res.status(400).json({ error_message: 'Email already registered' });
-                    }
-                    return res.status(500).json({ error_message: 'Database error' });
+        const userData = { first_name, last_name, email, password: hashedPassword };
+
+        userModel.createUser(userData, (err, userId) => {
+            if (err) {
+                if (err.code === 'SQLITE_CONSTRAINT') {
+                    return res.status(400).json({ error_message: 'Email already registered' });
                 }
-                res.status(201).json({ user_id: this.lastID });
+                return res.status(500).json({ error_message: 'Database error' });
             }
-        );
+            res.status(201).json({ user_id: userId });
+        });
     } catch (err) {
         res.status(500).json({ error_message: 'Internal server error' });
     }
 };
 
-exports.loginUser = async (req, res) => {
+exports.loginUser = (req, res) => {
     const { email, password } = req.body;
 
-    db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
+    userModel.getUserByEmail(email, async (err, user) => {
         if (err || !user) return res.status(401).json({ error_message: 'Invalid credentials' });
 
         const isValid = await bcrypt.compare(password, user.password);
