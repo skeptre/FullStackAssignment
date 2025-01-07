@@ -1,35 +1,47 @@
-const db = require('../../database');
+const questionModel = require('../models/questionModel');
 
-// Register for an event
-exports.registerForEvent = (req, res) => {
+// Add a question
+exports.addQuestion = (req, res) => {
+    const { question } = req.body;
     const eventId = req.params.event_id;
     const userId = req.user.user_id;
 
-    db.get(`SELECT * FROM events WHERE event_id = ?`, [eventId], (err, event) => {
-        if (err || !event) return res.status(404).json({ error_message: 'Event not found' });
-        if (event.close_registration < Date.now()) return res.status(400).json({ error_message: 'Registration is closed' });
-
-        db.get(`SELECT COUNT(*) AS count FROM attendees WHERE event_id = ?`, [eventId], (err, row) => {
-            if (row.count >= event.max_attendees) {
-                return res.status(400).json({ error_message: 'Event is full' });
-            }
-
-            db.run(`INSERT INTO attendees (event_id, user_id) VALUES (?, ?)`, [eventId, userId], function (err) {
-                if (err) return res.status(400).json({ error_message: 'Already registered for this event' });
-                res.status(201).json({ message: 'Successfully registered for the event' });
-            });
-        });
+    questionModel.addQuestion({ event_id: eventId, question, asked_by: userId }, (err, questionId) => {
+        if (err) return res.status(500).json({ error_message: 'Database error while adding question' });
+        res.status(201).json({ question_id: questionId, message: 'Question added successfully' });
     });
 };
 
-// Unregister from an event
-exports.unregisterFromEvent = (req, res) => {
-    const eventId = req.params.event_id;
+// Delete a question
+exports.deleteQuestion = (req, res) => {
+    const questionId = req.params.question_id;
+
+    questionModel.deleteQuestion(questionId, (err, changes) => {
+        if (err) return res.status(500).json({ error_message: 'Database error' });
+        if (changes === 0) return res.status(404).json({ error_message: 'Question not found' });
+        res.status(200).json({ message: 'Question deleted successfully' });
+    });
+};
+
+// Upvote a question
+exports.upvoteQuestion = (req, res) => {
+    const questionId = req.params.question_id;
     const userId = req.user.user_id;
 
-    db.run(`DELETE FROM attendees WHERE event_id = ? AND user_id = ?`, [eventId, userId], function (err) {
+    questionModel.upvoteQuestion(questionId, userId, (err) => {
+        if (err) return res.status(400).json({ error_message: 'Already voted on this question' });
+        res.status(200).json({ message: 'Upvoted successfully' });
+    });
+};
+
+// Downvote a question
+exports.downvoteQuestion = (req, res) => {
+    const questionId = req.params.question_id;
+    const userId = req.user.user_id;
+
+    questionModel.downvoteQuestion(questionId, userId, (err, changes) => {
         if (err) return res.status(500).json({ error_message: 'Database error' });
-        if (this.changes === 0) return res.status(400).json({ error_message: 'Not registered for this event' });
-        res.status(200).json({ message: 'Successfully unregistered from the event' });
+        if (changes === 0) return res.status(400).json({ error_message: 'You have not voted on this question' });
+        res.status(200).json({ message: 'Downvoted successfully' });
     });
 };

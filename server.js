@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
+const authMiddleware = require('../fsd24_eventitude_starter/app/middleware/authMiddleware').authMiddleware; // Import the correct middleware
 
 const app = express();
 
@@ -27,14 +29,16 @@ app.get('/', (req, res) => {
 // Import routes
 const userRoutes = require('./app/routes/user.server.routes');
 const eventRoutes = require('./app/routes/event.server.routes');
-// Uncomment when ready:
-// const questionRoutes = require('./app/routes/question.server.routes');
+const questionRoutes = require('./app/routes/question.server.routes');
+const searchRoutes = require('./app/routes/search.server.routes');
+const attendanceRoutes = require('./app/routes/attendance.server.routes');
 
 // Use routes
 app.use(userRoutes);
 app.use(eventRoutes);
-// Uncomment when ready:
-// app.use(questionRoutes);
+app.use(questionRoutes);
+app.use(searchRoutes);
+app.use(attendanceRoutes);
 
 // Default response for any other request
 app.use((req, res) => {

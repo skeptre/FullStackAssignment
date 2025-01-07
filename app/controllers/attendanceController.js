@@ -1,18 +1,36 @@
 const db = require('../../database');
 
+// Helper function to check if event exists and is open for registration
+const validateEventForRegistration = (eventId, callback) => {
+    db.get(`SELECT * FROM events WHERE event_id = ?`, [eventId], (err, event) => {
+        if (err || !event) return callback({ status: 404, message: 'Event not found' });
+        if (event.close_registration < Date.now()) {
+            return callback({ status: 400, message: 'Registration is closed' });
+        }
+        callback(null, event);
+    });
+};
+
+// Helper function to check if the event is full
+const checkEventCapacity = (eventId, maxAttendees, callback) => {
+    db.get(`SELECT COUNT(*) AS count FROM attendees WHERE event_id = ?`, [eventId], (err, row) => {
+        if (row.count >= maxAttendees) {
+            return callback({ status: 400, message: 'Event is full' });
+        }
+        callback(null);
+    });
+};
+
 // Register for an event
 exports.registerForEvent = (req, res) => {
     const eventId = req.params.event_id;
     const userId = req.user.user_id;
 
-    db.get(`SELECT * FROM events WHERE event_id = ?`, [eventId], (err, event) => {
-        if (err || !event) return res.status(404).json({ error_message: 'Event not found' });
-        if (event.close_registration < Date.now()) return res.status(400).json({ error_message: 'Registration is closed' });
+    validateEventForRegistration(eventId, (err, event) => {
+        if (err) return res.status(err.status).json({ error_message: err.message });
 
-        db.get(`SELECT COUNT(*) AS count FROM attendees WHERE event_id = ?`, [eventId], (err, row) => {
-            if (row.count >= event.max_attendees) {
-                return res.status(400).json({ error_message: 'Event is full' });
-            }
+        checkEventCapacity(eventId, event.max_attendees, (err) => {
+            if (err) return res.status(err.status).json({ error_message: err.message });
 
             db.run(`INSERT INTO attendees (event_id, user_id) VALUES (?, ?)`, [eventId, userId], function (err) {
                 if (err) return res.status(400).json({ error_message: 'Already registered for this event' });
