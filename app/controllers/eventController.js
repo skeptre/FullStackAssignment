@@ -1,96 +1,50 @@
-const db = require('../../database');
+const eventModel = require('../models/eventModel');
 const Joi = require('joi');
 
-// Validation schema for creating/updating events
+// Validation schema for event
 const eventSchema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().required(),
     location: Joi.string().required(),
-    start_date: Joi.number().integer().required(),
-    close_registration: Joi.number().integer().required(),
-    max_attendees: Joi.number().integer().required()
+    start_date: Joi.date().required(),
+    close_registration: Joi.date().required(),
+    max_attendees: Joi.number().required()
 });
 
-// Utility function for database error handling
-const handleDbError = (err, res, message = 'Database error') => {
-    if (err) {
-        console.error(message, err.message);
-        return res.status(500).json({ error_message: message });
-    }
-};
-
-// Create a new event
-exports.createEvent = async (req, res) => {
+// Create event
+exports.createEvent = (req, res) => {
     const { error, value } = eventSchema.validate(req.body);
     if (error) return res.status(400).json({ error_message: error.details[0].message });
 
-    const { name, description, location, start_date, close_registration, max_attendees } = value;
-
-    if (close_registration >= start_date) {
-        return res.status(400).json({ error_message: 'Registration must close before the event starts.' });
-    }
-
-    db.run(
-        `INSERT INTO events (name, description, location, start_date, close_registration, max_attendees, creator_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [name, description, location, start_date, close_registration, max_attendees, req.user.user_id],
-        function (err) {
-            handleDbError(err, res, 'Error creating event');
-            res.status(201).json({ event_id: this.lastID });
-        }
-    );
+    eventModel.createEvent(value, (err, eventId) => {
+        if (err) return res.status(500).json({ error_message: 'Database error' });
+        res.status(201).json({ event_id: eventId });
+    });
 };
 
-// Get event details
+// Get event by ID
 exports.getEvent = (req, res) => {
-    const eventId = req.params.id;
-
-    db.get(`SELECT * FROM events WHERE event_id = ?`, [eventId], (err, event) => {
-        if (err || !event) {
-            return res.status(404).json({ error_message: 'Event not found' });
-        }
+    eventModel.getEventById(req.params.id, (err, event) => {
+        if (err || !event) return res.status(404).json({ error_message: 'Event not found' });
         res.status(200).json(event);
     });
 };
 
-// Update an event
+// Update event
 exports.updateEvent = (req, res) => {
-    const eventId = req.params.id;
     const { error, value } = eventSchema.validate(req.body);
     if (error) return res.status(400).json({ error_message: error.details[0].message });
 
-    const { name, description, location, start_date, close_registration, max_attendees } = value;
-
-    db.run(
-        `UPDATE events
-         SET name = ?, description = ?, location = ?, start_date = ?, close_registration = ?, max_attendees = ?
-         WHERE event_id = ? AND creator_id = ?`,
-        [name, description, location, start_date, close_registration, max_attendees, eventId, req.user.user_id],
-        function (err) {
-            handleDbError(err, res, 'Error updating event');
-            if (this.changes === 0) {
-                console.error(`Unauthorized update attempt for event ID ${eventId} by user ${req.user.user_id}`);
-                return res.status(403).json({ error_message: 'You can only update your own events.' });
-            }
-            res.status(200).json({ message: 'Event updated successfully' });
-        }
-    );
+    eventModel.updateEvent(req.params.id, value, (err, changes) => {
+        if (err || changes === 0) return res.status(400).json({ error_message: 'Failed to update event' });
+        res.status(200).json({ message: 'Event updated successfully' });
+    });
 };
 
-// Delete (archive) an event
+// Delete event
 exports.deleteEvent = (req, res) => {
-    const eventId = req.params.id;
-
-    db.run(
-        `DELETE FROM events WHERE event_id = ? AND creator_id = ?`,
-        [eventId, req.user.user_id],
-        function (err) {
-            handleDbError(err, res, 'Error deleting event');
-            if (this.changes === 0) {
-                console.error(`Unauthorized delete attempt for event ID ${eventId} by user ${req.user.user_id}`);
-                return res.status(403).json({ error_message: 'You can only delete your own events.' });
-            }
-            res.status(200).json({ message: 'Event deleted successfully' });
-        }
-    );
+    eventModel.deleteEvent(req.params.id, (err, changes) => {
+        if (err || changes === 0) return res.status(400).json({ error_message: 'Failed to delete event' });
+        res.status(200).json({ message: 'Event deleted successfully' });
+    });
 };
