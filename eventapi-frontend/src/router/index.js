@@ -3,7 +3,7 @@ import Router from 'vue-router';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Events from '../views/Events.vue';
-import EventDetails from '../views/EventDetails.vue';
+import EventDetails from '../views/eventdetails.vue';
 import Search from '../views/Search.vue';
 
 Vue.use(Router);
