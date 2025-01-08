@@ -1,6 +1,8 @@
+const path = require('path'); // Import path module to handle file paths
 const sqlite3 = require('sqlite3').verbose();
 
-const DBSOURCE = 'db.sqlite';
+// Ensure db.sqlite is created in the backend directory
+const DBSOURCE = path.join(__dirname, 'db.sqlite');
 
 let db = new sqlite3.Database(DBSOURCE, (err) => {
     if (err) {

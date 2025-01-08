@@ -2,11 +2,11 @@
   "name": "fsd_eventitude_server",
   "version": "1.0.0",
   "description": "The Eventitude API for the 24/25 Full Stack Web Development assignment",
-  "main": "server.js",
+  "main": "eventapi-backend/server.js",
   "scripts": {
     "wipe": "mocha ./tests/database.refresh.js --reporter spec --log-level=warn --timeout 10000",
     "test": "mocha ./tests/test.*.js --reporter spec --log-level=warn --timeout 10000",
-    "dev": "nodemon server.js",
+    "dev": "nodemon eventapi-backend/server.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

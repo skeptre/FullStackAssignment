@@ -1,4 +1,4 @@
-const db = require("../database");
+const db = require("../eventapi-backend/database");
 
 let count = 0
 

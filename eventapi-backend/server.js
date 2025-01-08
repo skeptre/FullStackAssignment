@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
-const authMiddleware = require('../fsd24_eventitude_starter/app/middleware/authMiddleware').authMiddleware; // Import the correct middleware
+const authMiddleware = require('./app/middleware/authMiddleware').authMiddleware; // Import the correct middleware
 
 const app = express();
 
