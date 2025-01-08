@@ -1,9 +1,16 @@
-const express = require('express');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-require('dotenv').config();
-const authMiddleware = require('./app/middleware/authMiddleware').authMiddleware; // Import the correct middleware
+import express from 'express';
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authMiddleware from './app/middleware/authMiddleware.js'; // Adjusted import for ESM
+import userRoutes from './app/routes/user.server.routes.js';
+import eventRoutes from './app/routes/event.server.routes.js';
+import questionRoutes from './app/routes/question.server.routes.js';
+import searchRoutes from './app/routes/search.server.routes.js';
+import attendanceRoutes from './app/routes/attendance.server.routes.js';
+
+dotenv.config(); // Load environment variables
 
 const app = express();
 
@@ -25,13 +32,6 @@ app.listen(HTTP_PORT, () => {
 app.get('/', (req, res) => {
     res.json({ status: 'Alive' });
 });
-
-// Import routes
-const userRoutes = require('./app/routes/user.server.routes');
-const eventRoutes = require('./app/routes/event.server.routes');
-const questionRoutes = require('./app/routes/question.server.routes');
-const searchRoutes = require('./app/routes/search.server.routes');
-const attendanceRoutes = require('./app/routes/attendance.server.routes');
 
 // Use routes
 app.use(userRoutes);

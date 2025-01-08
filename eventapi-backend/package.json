@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "The Eventitude API for the 24/25 Full Stack Web Development assignment",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "wipe": "../node_modules/.bin/mocha ./tests/database.refresh.js --reporter spec --log-level=warn --timeout 10000",
     "test": "../node_modules/.bin/mocha ./tests/test.*.js --reporter spec --log-level=warn --timeout 10000",
@@ -42,7 +43,7 @@
     "mocha": "^10.2.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.1",
-    "sqlite3": "^5.1.6",
+    "sqlite3": "^5.1.7",
     "vue": "^3.5.13"
   },
   "devDependencies": {

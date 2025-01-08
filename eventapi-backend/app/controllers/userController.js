@@ -28,7 +28,8 @@ exports.createUser = async (req, res) => {
             }
             res.status(201).json({ user_id: userId });
         });
-    } catch (err) {
+    } catch (error) {
+        console.error('Error in createUser:', error); // Log the error for debugging
         res.status(500).json({ error_message: 'Internal server error' });
     }
 };

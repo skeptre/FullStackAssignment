@@ -1,20 +1,24 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Events from '../views/Events.vue';
-import EventDetails from '../views/eventdetails.vue';
+import EventDetails from '../views/EventDetails.vue';
 import Search from '../views/Search.vue';
 
-Vue.use(Router);
+// Define routes
+const routes = [
+    { path: '/', redirect: '/login' },
+    { path: '/login', name: 'login', component: Login },
+    { path: '/register', name: 'register', component: Register },
+    { path: '/events', name: 'events', component: Events },
+    { path: '/events/:id', name: 'eventDetails', component: EventDetails },
+    { path: '/search', name: 'search', component: Search },
+];
 
-export default new Router({
-    mode: 'history',
-    routes: [
-        { path: '/', name: 'login', component: Login },
-        { path: '/register', name: 'register', component: Register },
-        { path: '/events', name: 'events', component: Events },
-        { path: '/events/:id', name: 'eventDetails', component: EventDetails },
-        { path: '/search', name: 'search', component: Search },
-    ],
+// Create router instance
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
 });
+
+export default router;

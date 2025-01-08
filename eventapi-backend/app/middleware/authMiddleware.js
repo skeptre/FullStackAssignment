@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 console.log('SECRET_KEY:', process.env.SECRET_KEY);
 
-exports.authMiddleware = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
     if (!process.env.SECRET_KEY) {
         return res.status(500).json({ error_message: 'Server misconfiguration: Missing SECRET_KEY' });
     }

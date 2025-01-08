@@ -1,10 +1,16 @@
-const path = require('path'); // Import path module to handle file paths
-const sqlite3 = require('sqlite3').verbose();
+import path from 'path';
+import sqlite3 from 'sqlite3';
+import { fileURLToPath } from 'url';
+
+// Handle __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ensure db.sqlite is created in the backend directory
 const DBSOURCE = path.join(__dirname, 'db.sqlite');
 
-let db = new sqlite3.Database(DBSOURCE, (err) => {
+// Initialize database connection
+const db = new sqlite3.Database(DBSOURCE, (err) => {
     if (err) {
         console.error('Database connection error:', err.message);
         throw err;
@@ -30,8 +36,7 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
                  email         TEXT UNIQUE NOT NULL,
                  password      TEXT        NOT NULL,
                  salt          TEXT,
-                 session_token TEXT,
-                 CONSTRAINT email_unique UNIQUE (email)
+                 session_token TEXT
              )`,
             (err) => {
                 if (err) {
@@ -126,4 +131,4 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
     }
 });
 
-module.exports = db;
+export default db;
