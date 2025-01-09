@@ -1,8 +1,10 @@
-const express = require('express');
-const attendanceController = require('../controllers/attendanceController');
+import express from 'express';
+import { registerForEvent, unregisterFromEvent } from '../controllers/attendanceController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
-router.post('/event/:event_id/register', attendanceController.registerForEvent); // Register for an event
-router.delete('/event/:event_id/register', attendanceController.unregisterFromEvent); // Unregister from an event
+router.post('/event/:event_id/register', authMiddleware, registerForEvent); // Register for an event
+router.delete('/event/:event_id/register', authMiddleware, unregisterFromEvent); // Unregister from an event
 
-module.exports = router;
+export default router;

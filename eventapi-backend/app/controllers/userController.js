@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const Joi = require('joi');
-const userModel = require('../models/userModel'); // Import the user model
+import bcrypt from 'bcrypt';
+import Joi from 'joi';
+import userModel from '../models/userModel.js'; // Import the user model
 
 const userSchema = Joi.object({
     first_name: Joi.string().required(),
@@ -9,7 +9,7 @@ const userSchema = Joi.object({
     password: Joi.string().min(8).required()
 });
 
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
     const { error, value } = userSchema.validate(req.body);
     if (error) return res.status(400).json({ error_message: error.details[0].message });
 
@@ -34,7 +34,7 @@ exports.createUser = async (req, res) => {
     }
 };
 
-exports.loginUser = (req, res) => {
+export const loginUser = (req, res) => {
     const { email, password } = req.body;
 
     userModel.getUserByEmail(email, async (err, user) => {

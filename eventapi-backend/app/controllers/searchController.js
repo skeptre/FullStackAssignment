@@ -1,6 +1,6 @@
-const db = require('../../database');
+import db from '../../database.js';
 
-exports.searchEvents = (req, res) => {
+export const searchEvents = (req, res) => {
     const { q, status, limit = 10, offset = 0 } = req.query;
     let query = `SELECT * FROM events`;
     const params = [];

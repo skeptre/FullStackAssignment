@@ -1,8 +1,7 @@
-const db = require('../../database');
+import db from '../../database.js';
 
 // Add a question to an event
-exports.addQuestion = (questionData, callback) => {
-    const { event_id, question, asked_by } = questionData;
+export const addQuestion = ({ event_id, question, asked_by }, callback) => {
     db.run(
         `INSERT INTO questions (event_id, question, asked_by) VALUES (?, ?, ?)`,
         [event_id, question, asked_by],
@@ -13,14 +12,14 @@ exports.addQuestion = (questionData, callback) => {
 };
 
 // Delete a question
-exports.deleteQuestion = (questionId, callback) => {
+export const deleteQuestion = (questionId, callback) => {
     db.run(`DELETE FROM questions WHERE question_id = ?`, [questionId], function (err) {
         callback(err, this.changes); // Return affected rows
     });
 };
 
 // Upvote a question
-exports.upvoteQuestion = (questionId, userId, callback) => {
+export const upvoteQuestion = (questionId, userId, callback) => {
     db.run(
         `INSERT INTO votes (question_id, voter_id) VALUES (?, ?)`,
         [questionId, userId],
@@ -31,7 +30,7 @@ exports.upvoteQuestion = (questionId, userId, callback) => {
 };
 
 // Downvote a question
-exports.downvoteQuestion = (questionId, userId, callback) => {
+export const downvoteQuestion = (questionId, userId, callback) => {
     db.run(
         `DELETE FROM votes WHERE question_id = ? AND voter_id = ?`,
         [questionId, userId],

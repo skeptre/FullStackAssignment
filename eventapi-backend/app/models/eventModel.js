@@ -1,7 +1,7 @@
-const db = require('../../database');
+import db from '../../database.js';
 
 // Create event
-exports.createEvent = (eventData, callback) => {
+export const createEvent = (eventData, callback) => {
     const { name, description, location, start_date, close_registration, max_attendees, creator_id } = eventData;
     db.run(
         `INSERT INTO events (name, description, location, start_date, close_registration, max_attendees, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -13,12 +13,12 @@ exports.createEvent = (eventData, callback) => {
 };
 
 // Get event by ID
-exports.getEventById = (eventId, callback) => {
+export const getEventById = (eventId, callback) => {
     db.get(`SELECT * FROM events WHERE event_id = ?`, [eventId], callback);
 };
 
 // Update event
-exports.updateEvent = (eventId, eventData, callback) => {
+export const updateEvent = (eventId, eventData, callback) => {
     const { name, description, location, start_date, close_registration, max_attendees } = eventData;
     db.run(
         `UPDATE events SET name = ?, description = ?, location = ?, start_date = ?, close_registration = ?, max_attendees = ? WHERE event_id = ?`,
@@ -30,7 +30,7 @@ exports.updateEvent = (eventId, eventData, callback) => {
 };
 
 // Delete event
-exports.deleteEvent = (eventId, callback) => {
+export const deleteEvent = (eventId, callback) => {
     db.run(`DELETE FROM events WHERE event_id = ?`, [eventId], function (err) {
         callback(err, this.changes); // Return the number of rows affected
     });
